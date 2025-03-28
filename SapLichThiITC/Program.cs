@@ -1,6 +1,7 @@
 ﻿using SapLichThiITCAlgo;
+using SapLichThiITCAlgoNew;
 using SapLichThiITCCore;
-using SapLichThiITCInputHelper;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace SapLichThiITC
 {
@@ -8,14 +9,99 @@ namespace SapLichThiITC
     {
         static void Main(string[] args)
         {
-            string filePath = "exam\\exam_comp_set8.exam";
-            /*
-            string folderPath = "xmlexams";
-            DatasetMultipleInputXml datasetMultipleXml = new DatasetMultipleInputXml(folderPath).Run();
-            */
+            Console.OutputEncoding = System.Text.Encoding.UTF8;
 
+            RunXmlDataset();
+
+        }
+
+        static void RunXmlDataset()
+        {
+            string[] GetAllFilesInFolderAndSubfolder(string folderPath)
+            {
+                return Directory.GetFiles(folderPath, "*.*", SearchOption.AllDirectories).Where(x => x.EndsWith(".xml")).ToArray();
+            }
+            string folderPath = "xmlexams";
+            foreach (var filePathXml in GetAllFilesInFolderAndSubfolder(folderPath))
+            {
+
+                Console.WriteLine(filePathXml);
+
+                DatasetXml.ExamTimetablingData data =
+                    DatasetXml.ExamTimetablingData
+                    .FromRawExamTimeTablingData(
+                        DatasetXmlRaw.ExamTimetablingData.Parse(filePathXml));
+
+                LinkagerXml linkager = new()
+                {
+                    I_data = data,
+                    I_exams = data.Exams,
+                };
+                linkager.Initialize().Run();
+
+                ColorerXml colorer = new()
+                {
+                    I_exam_after = linkager.O_exam_after,
+                    I_exam_exclusive = linkager.O_exam_exclusive,
+                    I_exam_linkages = linkager.O_exam_linkages,
+                    I_exam_requires = linkager.O_exam_requires,
+                    I_exams = data.Exams,
+                };
+                colorer.Initialize().Run();
+
+                BoxGeneratorXml boxGenerator = new()
+                {
+                    I_data = data,
+                    I_exam_linkages = linkager.O_exam_linkages,
+                };
+                boxGenerator.Initialize().Run();
+
+                FirstSolutionGeneratorXml generatorXml = new()
+                {
+                    I_data = data,
+                    I_color_exams = colorer.O_color_exams,
+                    I_exam_linkages = linkager.O_exam_linkages,
+                    I_exam_after = linkager.O_exam_after,
+                    I_exam_exclusive = linkager.O_exam_exclusive,
+                    I_exam_requires = linkager.O_exam_requires,
+                    I_lake = boxGenerator.O_lake,
+                };
+                generatorXml.Initialize().Run();
+
+                ValidatorXml validatorXml = new()
+                {
+                    I_data = data,
+                    I_lake = boxGenerator.O_lake,
+                };
+                validatorXml.Initialize().Run();
+
+
+                SimulatedAnnealingXml simulatedAnnealing = new()
+                {
+                    I_exam_after = linkager.O_exam_after,
+                    I_exam_exclusive = linkager.O_exam_exclusive,
+                    I_exam_linkages = linkager.O_exam_linkages,
+                    I_exam_requires = linkager.O_exam_requires,
+                    I_lake = boxGenerator.O_lake,
+                };
+                simulatedAnnealing.RunSimulatedAnnealingShift(data, boxGenerator.O_lake, 100, 0.55, 0.9, 3, 5);
+                simulatedAnnealing.RunSimulatedAnnealing(data, boxGenerator.O_lake, 10, 0.55, 0.99, 3, 10);
+
+                validatorXml = new()
+                {
+                    I_data = data,
+                    I_lake = boxGenerator.O_lake,
+                };
+                validatorXml.Initialize().Run();
+            }
+        }
+
+        static void RunNormalDataset()
+        {
+            
+            string filePath = "exam\\exam_comp_set8.exam";
             TimetablingDataReader timetablingDataReader = new();
-            TimetablingData data =  timetablingDataReader.Read(filePath);
+            TimetablingData data = timetablingDataReader.Read(filePath);
             Console.OutputEncoding = System.Text.Encoding.UTF8;
             Linkager linkager = new()
             {
@@ -32,9 +118,9 @@ namespace SapLichThiITC
                 I_exam_exclusive = linkager.O_exam_exclusive,
             };
             colorer.Initialize().Run();
-            ValidatorColor validatorColor = new() 
-            { 
-                I_color_exams = colorer.O_color_exams 
+            ValidatorColor validatorColor = new()
+            {
+                I_color_exams = colorer.O_color_exams
             };
             validatorColor.Initialize().Run();
             BoxGenerator boxGenerator = new()
@@ -53,7 +139,7 @@ namespace SapLichThiITC
                 I_exam_linkages = linkager.O_exam_linkages,
                 I_exam_requires = linkager.O_exam_requires,
             };
-            
+
             firstSolutionGenerator.Initialize().Run();
             Validator validator = new()
             {
@@ -69,15 +155,16 @@ namespace SapLichThiITC
             Console.WriteLine($"soft constraint: {sp}");
 
 
-            SimulatedAnnealing simulatedAnnealing = new() 
-            { 
-                I_exam_linkages = linkager.O_exam_linkages, 
-                I_lake = firstSolutionGenerator.I_lake ,
+            SimulatedAnnealing simulatedAnnealing = new()
+            {
+                I_exam_linkages = linkager.O_exam_linkages,
+                I_lake = firstSolutionGenerator.I_lake,
                 I_exam_after = linkager.O_exam_after,
                 I_exam_exclusive = linkager.O_exam_exclusive,
                 I_exam_requires = linkager.O_exam_requires,
             };
-            simulatedAnnealing.RunSimulatedAnnealing(data, boxGenerator.O_lake, 10, 0.55, 0.99, 3, 10); ;
+            simulatedAnnealing.RunSimulatedAnnealingShift(data, boxGenerator.O_lake, 100, 0.55, 0.9, 3, 5);
+            simulatedAnnealing.RunSimulatedAnnealing(data, boxGenerator.O_lake, 10, 0.55, 0.99, 3, 10);
             validator.Initialize().Run();
         }
     }

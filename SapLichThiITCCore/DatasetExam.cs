@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.IO;
-using System.Linq;
+﻿using System.Globalization;
 using static SapLichThiITCCore.DatasetExam;
 
 namespace SapLichThiITCCore
@@ -163,13 +159,14 @@ namespace SapLichThiITCCore
             }
         }
 
-        public class Period
+        public record Period
         {
             public int Id { get; set; }
             public DateTime Date { get; set; }
             public TimeSpan StartTime { get; set; }
             public int DurationMinutes { get; set; }
             public int Penalty { get; set; }
+
         }
 
         public class Room
@@ -199,6 +196,6 @@ namespace SapLichThiITCCore
             public int Weight { get; set; }
         }
 
-        
+
     }
 }

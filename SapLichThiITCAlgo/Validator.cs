@@ -1,9 +1,4 @@
 ﻿using SapLichThiITCCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using static SapLichThiITCCore.DatasetExam;
 
 namespace SapLichThiITCAlgo
@@ -51,12 +46,12 @@ namespace SapLichThiITCAlgo
                 {
                     foreach (var exam in puddle.Exams)
                     {
-                        exams.TryAdd(exam,0);
+                        exams.TryAdd(exam, 0);
                         exams[exam]++;
                     }
                 }
             }
-            var count = exams.Where(x=>x.Value > 1).Count();
+            var count = exams.Where(x => x.Value > 1).Count();
             Console.WriteLine("===================================");
             Console.WriteLine($"Duplicate exam: {count}");
         }

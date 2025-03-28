@@ -8,6 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\SapLichThiITCAlgoNew\SapLichThiITCAlgoNew.csproj" />
     <ProjectReference Include="..\SapLichThiITCAlgo\SapLichThiITCAlgo.csproj" />
     <ProjectReference Include="..\SapLichThiITCCore\SapLichThiITCCore.csproj" />
     <ProjectReference Include="..\SapLichThiITCInputHelper\SapLichThiITCInputHelper.csproj" />

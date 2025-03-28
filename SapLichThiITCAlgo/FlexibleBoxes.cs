@@ -1,9 +1,4 @@
 ﻿using SapLichThiITCCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using static SapLichThiITCCore.DatasetExam;
 
 namespace SapLichThiITCAlgo
@@ -45,6 +40,13 @@ namespace SapLichThiITCAlgo
         public void Clear()
         {
             Exams.Clear();
+        }
+
+        public List<Exam> ClearAndReturn()
+        {
+            var exams = new List<Exam>(Exams);
+            Exams.Clear();
+            return exams;
         }
     }
     public class Pond
@@ -148,6 +150,19 @@ namespace SapLichThiITCAlgo
             {
                 puddle.Clear();
             }
+            Exams.Clear();
+        }
+
+
+        public List<Exam> ClearAndReturn()
+        {
+            var result = new List<Exam>();
+            foreach (var puddle in Puddles)
+            {
+                result.AddRange(puddle.ClearAndReturn());
+            }
+            Exams.Clear();
+            return result;
         }
     }
     public class Lake

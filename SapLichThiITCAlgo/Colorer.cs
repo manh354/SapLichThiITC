@@ -1,10 +1,4 @@
-﻿using SapLichThiITCCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static SapLichThiITCCore.DatasetExam;
+﻿using static SapLichThiITCCore.DatasetExam;
 
 namespace SapLichThiITCAlgo
 {
@@ -17,7 +11,7 @@ namespace SapLichThiITCAlgo
         public required HashSet<Exam> I_exam_exclusive { get; set; }
         private Dictionary<Exam, HashSet<int>> P_exams_studentIds { get; set; }
         public Dictionary<int, HashSet<Exam>> O_color_exams { get; set; }
-        
+
         public Colorer Initialize()
         {
             O_color_exams = new();

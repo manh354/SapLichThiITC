@@ -1,9 +1,4 @@
 ﻿using SapLichThiITCCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using static SapLichThiITCCore.DatasetExam;
 
 namespace SapLichThiITCAlgo
@@ -18,7 +13,7 @@ namespace SapLichThiITCAlgo
         public HashSet<Exam> O_exam_exclusive { get; set; }
 
         private Dictionary<Exam, HashSet<int>> P_exam_studentIds { get; set; }
-        
+
         public Linkager Initialize()
         {
             O_exam_linkages = new();
@@ -66,17 +61,17 @@ namespace SapLichThiITCAlgo
                     O_exam_linkages[exam1].Add(exam2);
                     O_exam_linkages[exam2].Add(exam1);
                 }
-                else if(periodHardConstraint.Type== "EXAM_COINCIDENCE")
+                else if (periodHardConstraint.Type == "EXAM_COINCIDENCE")
                 {
                     O_exam_requires.TryAdd(exam1, new());
                     O_exam_requires[exam1].Add(exam2);
-                    O_exam_requires.TryAdd(exam2 , new());
+                    O_exam_requires.TryAdd(exam2, new());
                     O_exam_requires[exam2].Add(exam1);
 
                     O_exam_linkages[exam1].UnionWith(O_exam_linkages[exam2]);
                     O_exam_linkages[exam2].UnionWith(O_exam_linkages[exam1]);
                 }
-                else if(periodHardConstraint.Type=="AFTER")
+                else if (periodHardConstraint.Type == "AFTER")
                 {
                     O_exam_after.TryAdd(exam1, new());
                     O_exam_after[exam1].Add((exam2, exam1));
@@ -86,6 +81,11 @@ namespace SapLichThiITCAlgo
                     O_exam_linkages[exam1].Add(exam2);
                     O_exam_linkages[exam2].Add(exam1);
                 }
+            }
+
+            foreach (var roomHardConstraint in I_data.RoomHardConstraints)
+            {
+                O_exam_exclusive.Add(I_exams[roomHardConstraint.ExamId]);
             }
             return this;
         }

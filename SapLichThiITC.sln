@@ -16,6 +16,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SapLichThiITCInputHelper", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SapLichThiITCAlgoNew", "SapLichThiITCAlgoNew\SapLichThiITCAlgoNew.csproj", "{F19D1755-7725-4E78-A37C-FA92D19A06F4}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SapLichThiAlgoKaggle", "SapLichThiKaggle\SapLichThiAlgoKaggle.csproj", "{D87E68BC-698B-49D5-80D1-3F4752CABDFF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -42,6 +44,10 @@ Global
 		{F19D1755-7725-4E78-A37C-FA92D19A06F4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F19D1755-7725-4E78-A37C-FA92D19A06F4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F19D1755-7725-4E78-A37C-FA92D19A06F4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D87E68BC-698B-49D5-80D1-3F4752CABDFF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D87E68BC-698B-49D5-80D1-3F4752CABDFF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D87E68BC-698B-49D5-80D1-3F4752CABDFF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D87E68BC-698B-49D5-80D1-3F4752CABDFF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

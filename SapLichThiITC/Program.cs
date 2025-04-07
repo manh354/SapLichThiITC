@@ -1,6 +1,7 @@
 ﻿using SapLichThiITCAlgo;
 using SapLichThiITCAlgoNew;
 using SapLichThiITCCore;
+using SapLichThiITCInputHelper;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace SapLichThiITC
@@ -11,7 +12,7 @@ namespace SapLichThiITC
         {
             Console.OutputEncoding = System.Text.Encoding.UTF8;
 
-            RunXmlDataset();
+            RunKaggleDataset();
 
         }
 
@@ -98,7 +99,7 @@ namespace SapLichThiITC
 
         static void RunNormalDataset()
         {
-            
+
             string filePath = "exam\\exam_comp_set8.exam";
             TimetablingDataReader timetablingDataReader = new();
             TimetablingData data = timetablingDataReader.Read(filePath);
@@ -166,6 +167,24 @@ namespace SapLichThiITC
             simulatedAnnealing.RunSimulatedAnnealingShift(data, boxGenerator.O_lake, 100, 0.55, 0.9, 3, 5);
             simulatedAnnealing.RunSimulatedAnnealing(data, boxGenerator.O_lake, 10, 0.55, 0.99, 3, 10);
             validator.Initialize().Run();
+        }
+
+        static void RunKaggleDataset()
+        {
+            string folderPath = "kaggleexams";
+            var classRoomPath = Path.Join(folderPath, "classrooms.csv");
+            var coursePath = Path.Join(folderPath, "courses.csv");
+            var instructorsPath = Path.Join(folderPath, "instructors.csv");
+            var schedulePath = Path.Join(folderPath, "schedule.csv");
+            var studentsPath = Path.Join(folderPath, "students.csv");
+            var timeslotsPath = Path.Join(folderPath, "timeslots.csv");
+            InputHandler inputHandler = new();
+            var students = inputHandler.ReadStudents(studentsPath);
+            var courses = inputHandler.ReadCourses(coursePath);
+            var instructors = inputHandler.ReadInstructors(instructorsPath);
+            var timeslots = inputHandler.ReadTimeslots(timeslotsPath);
+            var classRooms = inputHandler.ReadClassrooms(classRoomPath);
+
         }
     }
 }

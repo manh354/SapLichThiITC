@@ -69,7 +69,7 @@ public class EvaluatorXml
         {
             if (!_assignments.ContainsKey(exam))
             {
-                result.HardConstraintViolations.Add($"Exam {exam.Id} has no assignment");
+                result.HardConstraintViolations.Add($"Course {exam.Id} has no assignment");
                 result.IsValid = false;
             }
         }
@@ -83,14 +83,14 @@ public class EvaluatorXml
             // Check valid period
             if (!exam.AvailablePeriods.Any(p => p.Period == assignment.Period))
             {
-                result.HardConstraintViolations.Add($"Exam {exam.Id} assigned to invalid period {assignment.Period}");
+                result.HardConstraintViolations.Add($"Course {exam.Id} assigned to invalid period {assignment.Period}");
                 result.IsValid = false;
             }
 
             // Check room availability and capacity
             if (exam.MaxRooms == 0 && assignment.Rooms.Count > 0)
             {
-                result.HardConstraintViolations.Add($"Exam {exam.Id} should not have room assignments");
+                result.HardConstraintViolations.Add($"Course {exam.Id} should not have room assignments");
                 result.IsValid = false;
             }
 
@@ -99,7 +99,7 @@ public class EvaluatorXml
             {
                 if (room == null)
                 {
-                    result.HardConstraintViolations.Add($"Exam {exam.Id} assigned to invalid room {room}");
+                    result.HardConstraintViolations.Add($"Course {exam.Id} assigned to invalid room {room}");
                     result.IsValid = false;
                     continue;
                 }
@@ -129,7 +129,7 @@ public class EvaluatorXml
             // Check max rooms
             if (assignment.Rooms.Count > exam.MaxRooms)
             {
-                result.HardConstraintViolations.Add($"Exam {exam.Id} exceeds max rooms ({exam.MaxRooms})");
+                result.HardConstraintViolations.Add($"Course {exam.Id} exceeds max rooms ({exam.MaxRooms})");
                 result.IsValid = false;
             }
         }

@@ -42,6 +42,24 @@
     <None Update="exam\exam_comp_set8.exam">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="kaggleexams\classrooms.csv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="kaggleexams\courses.csv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="kaggleexams\instructors.csv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="kaggleexams\schedule.csv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="kaggleexams\students.csv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="kaggleexams\timeslots.csv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="xmlexams\pu-exam-fal08.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
@@ -72,6 +90,10 @@
     <None Update="xmlexams\pu-exam-spr12.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="kaggleexams\" />
   </ItemGroup>
 
 </Project>

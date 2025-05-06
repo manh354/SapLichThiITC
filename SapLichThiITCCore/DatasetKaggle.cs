@@ -56,7 +56,14 @@ namespace SapLichThiITCCore
             public string RoomType { get; set; }
         }
 
-        
+        public class Exam
+        {
+            public int ExamId { get; set; }
+            public string CourseId { get; set; }
+            public List<string> StudentIds { get; set; }
+            public string Description { get; set; }
+
+        }
 
     }
 }

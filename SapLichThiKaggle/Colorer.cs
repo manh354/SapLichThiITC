@@ -1,6 +1,6 @@
 ﻿using static SapLichThiITCCore.DatasetExam;
 
-namespace SapLichThiITCAlgo
+namespace SapLichThiAlgoKaggle
 {
     public class Colorer
     {
@@ -57,7 +57,7 @@ namespace SapLichThiITCAlgo
                         }
                         // If exam is not a key in the dictionary, its adjacency list is empty
 
-                        if (degree > maxDegree || (degree == maxDegree && selected == null))
+                        if (degree > maxDegree || degree == maxDegree && selected == null)
                         {
                             maxDegree = degree;
                             selected = exam;

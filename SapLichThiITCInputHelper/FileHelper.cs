@@ -1,6 +1,4 @@
-﻿
-
-namespace SapLichThiITC
+﻿namespace SapLichThiITCInputHelper
 {
     public static class FileHelper
     {

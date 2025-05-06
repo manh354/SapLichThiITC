@@ -1,7 +1,7 @@
 ﻿using SapLichThiITCCore;
 using static SapLichThiITCCore.DatasetExam;
 
-namespace SapLichThiITCAlgo
+namespace SapLichThiAlgoKaggle
 {
     public class Solution
     {
@@ -196,7 +196,7 @@ namespace SapLichThiITCAlgo
                 switch (constraint.Type)
                 {
                     case "AFTER":
-                        if (period1.Date < period2.Date || (period1.Date == period2.Date && period1.StartTime <= period2.StartTime))
+                        if (period1.Date < period2.Date || period1.Date == period2.Date && period1.StartTime <= period2.StartTime)
                             violations++;
                         break;
                     case "EXAM_COINCIDENCE":

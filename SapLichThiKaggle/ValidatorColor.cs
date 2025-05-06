@@ -1,6 +1,6 @@
 ﻿using static SapLichThiITCCore.DatasetExam;
 
-namespace SapLichThiITCAlgo
+namespace SapLichThiAlgoKaggle
 {
     public class ValidatorColor
     {

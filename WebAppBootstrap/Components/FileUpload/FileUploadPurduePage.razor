@@ -1,0 +1,27 @@
+﻿@page "/fileUploadPurdue"
+
+
+<MudFileUpload T="IBrowserFile" FilesChanged="UploadFile">
+    <ActivatorContent>
+        <MudButton Variant="Variant.Filled"
+                   Color="Color.Primary"
+                   StartIcon="@Icons.Material.Filled.CloudUpload">
+            Tải file 
+        </MudButton>
+    </ActivatorContent>
+    <SelectedTemplate>
+        @if (context != null)
+        {
+            <MudText>@context.Name</MudText>
+        }
+        else
+        {
+            <MudText>Chưa có file nào</MudText>
+        }
+    </SelectedTemplate>
+</MudFileUpload>
+
+<MudButton OnClick="ProcessUploadedFile" Color="Color.Success" Variant="Variant.Filled">
+    Xử lý file 
+</MudButton>
+

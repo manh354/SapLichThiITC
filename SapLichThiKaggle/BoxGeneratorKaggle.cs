@@ -1,5 +1,4 @@
-﻿using SapLichThiITCAlgo;
-using SapLichThiITCCore;
+﻿using SapLichThiITCCore;
 using static SapLichThiITCCore.DatasetKaggle;
 
 namespace SapLichThiAlgoKaggle
@@ -7,7 +6,7 @@ namespace SapLichThiAlgoKaggle
     public class BoxGeneratorKaggle
     {
         public required TimetablingData I_data;
-        public required Dictionary<
+        public required Dictionary< Exam
               , HashSet<Course>> I_exam_linkages;
         public Lake O_lake;
         public BoxGeneratorKaggle Initialize()
@@ -30,7 +29,7 @@ namespace SapLichThiAlgoKaggle
                     .ToList()
                 })
                 .ToList();
-            O_lake = new Lake() { Linkages = I_exam_linkages, Ponds = ponds };
+            O_lake = new Lake() { Linkages = null, Ponds = ponds };
 
             return this;
         }

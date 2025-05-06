@@ -1,7 +1,7 @@
 ﻿using SapLichThiITCCore;
 using static SapLichThiITCCore.DatasetExam;
 
-namespace SapLichThiITCAlgo
+namespace SapLichThiAlgoKaggle
 {
     public class Puddle
     {
@@ -97,14 +97,14 @@ namespace SapLichThiITCAlgo
         {
             var clone = new Pond
             {
-                Period = this.Period,
-                Puddles = this.Puddles.Select(p => new Puddle
+                Period = Period,
+                Puddles = Puddles.Select(p => new Puddle
                 {
                     Room = p.Room,
                     Exams = p.Exams.ToList()
                 }).ToList(),
-                Exams = new HashSet<Exam>(this.Exams),
-                _totalStudents = this._totalStudents
+                Exams = new HashSet<Exam>(Exams),
+                _totalStudents = _totalStudents
             };
             return clone;
         }

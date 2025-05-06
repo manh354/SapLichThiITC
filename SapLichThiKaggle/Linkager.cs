@@ -1,7 +1,7 @@
 ﻿using SapLichThiITCCore;
 using static SapLichThiITCCore.DatasetExam;
 
-namespace SapLichThiITCAlgo
+namespace SapLichThiAlgoKaggle
 {
     public class Linkager
     {

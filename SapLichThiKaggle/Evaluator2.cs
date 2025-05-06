@@ -1,4 +1,4 @@
-﻿using SapLichThiITCAlgo;
+﻿using SapLichThiAlgoKaggle;
 using SapLichThiITCCore;
 
 public class Evaluator2

@@ -18,8 +18,8 @@ namespace SapLichThiITCAlgoNew
             _totalStudents = 0;
         }
         // Method to calculate the remaining capacity
-        public int GetRemainingCapacity() => Room.Size - _totalStudents;
-        public int GetRemainingCapacityAlt() => Room.AltSize - _totalStudents;
+        public int GetRemainingCapacity() => Room.Size ;
+        public int GetRemainingCapacityAlt() => Room.AltSize ;
 
 
         // Method to get the total capacity
@@ -39,6 +39,11 @@ namespace SapLichThiITCAlgoNew
             Exam.Assignment.Assign(period, this.Room);
             // Update the total number of students
             _totalStudents = exam.Students.Count;
+        }
+
+        public void UpdateAssignmentOnlyExam(Period period)
+        {
+            Exam?.Assignment.Assign(period, this.Room);
         }
 
         // Remove an exam and update the capacity
@@ -136,7 +141,7 @@ namespace SapLichThiITCAlgoNew
             return clone;
         }
 
-        public void CopyFrom(Pond other)
+        public void CopyAndUpdateExamAssignmentFrom(Pond other)
         {
             Period = other.Period;
             Puddles = other.Puddles.Select(p => new Puddle
@@ -148,6 +153,15 @@ namespace SapLichThiITCAlgoNew
             }).ToList();
             Exams = new HashSet<Exam>(other.Exams);
             _totalStudents = other._totalStudents;
+            UpdateAssignmentOnlyExam();
+        }
+
+        public void UpdateAssignmentOnlyExam()
+        {
+            foreach (var puddle in Puddles)
+            {
+                puddle.UpdateAssignmentOnlyExam(Period);
+            }
         }
 
 
@@ -156,7 +170,7 @@ namespace SapLichThiITCAlgoNew
             IEnumerable<Puddle> tempSuitablePuddles = Puddles;
             if (condition != null)
                 tempSuitablePuddles = Puddles.Where(condition);
-            suitablePuddles = tempSuitablePuddles.Where(x => x.GetRemainingCapacity() >= exam.Students.Count).ToList();
+            suitablePuddles = tempSuitablePuddles.ToList();
             if (suitablePuddles.Count > 0)
             {
                 if (comparer != null)
@@ -180,6 +194,7 @@ namespace SapLichThiITCAlgoNew
                 puddle.Clear();
             }
             Exams.Clear();
+            _totalStudents = 0;
         }
 
 
@@ -195,6 +210,7 @@ namespace SapLichThiITCAlgoNew
                 }
             }
             Exams.Clear();
+            _totalStudents = 0;
             return result;
         }
     }
@@ -219,6 +235,14 @@ namespace SapLichThiITCAlgoNew
             }
             chosenPond = null;
             return false;
+        }
+
+        public void UpdateAssignmentOnly()
+        {
+            foreach (var pond in Ponds)
+            {
+                pond.UpdateAssignmentOnlyExam();
+            }
         }
 
         public bool GetSuitablePondsForExams(List<Exam> exams, out Pond? chosenPond, out List<Pond> suitablePonds, Func<Pond, bool>? condition, Comparer<Pond>? comparer)

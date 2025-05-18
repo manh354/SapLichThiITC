@@ -52,27 +52,29 @@ namespace SapLichThiITCAlgoNew
                     EvaluationResult afterResult = evaluator.Evaluate();
                     var afterPen = afterResult.TotalPenalty;
 
-                    if (afterPen < currPen)
+                    if (afterPen < currPen )
                     {
+                        result = afterResult;
                         currPen = afterPen;
                         continue;
                     }
-                    if (afterPen <= currPen)
+                    if (afterPen >= currPen)
                     {
                         var propability = ProbilityFunction(currPen, afterPen, currentTemp, volatility);
                         var acceptSolution = _random.NextDouble() <= propability;
                         if (!acceptSolution)
                         {
-                            RollbackMove(P_stepCount);
+                            RollbackMove(lake, P_stepCount);
                             continue;
                         }
+                        result = afterResult;
                         currPen = afterPen;
                         continue;
                     }
 
                 }
                 Console.WriteLine($"Is Valid: {result.HardConstraintViolations.Count}");
-                Console.WriteLine($"Penalty: {result.TotalPenalty}");
+                Console.WriteLine($"Penalty: {currPen}");
             }
         }
 
@@ -91,7 +93,6 @@ namespace SapLichThiITCAlgoNew
                 double currentTemp = startingTemperature * Math.Pow(coolingCoef, i);
                 for (int j = 0; j < markovChainLength; j++)
                 {
-
                      ForwardMoveShift(lake);
 
                     var afterResult = evaluator.Evaluate();
@@ -99,6 +100,7 @@ namespace SapLichThiITCAlgoNew
 
                     if (currPen > afterPen)
                     {
+                        result = afterResult;
                         currPen = afterPen;
                         continue;
                     }
@@ -108,9 +110,10 @@ namespace SapLichThiITCAlgoNew
                         var acceptSolution = _random.NextDouble() <= propability;
                         if (!acceptSolution)
                         {
-                            RollBackMoveShift();
+                            RollBackMoveShift(lake);
                             continue;
                         }
+                        result = afterResult;
                         currPen = afterPen;
                         continue;
                     }
@@ -174,6 +177,7 @@ namespace SapLichThiITCAlgoNew
                 randFromPond.RemoveExam(randFromPuddle, randExam);
                 randToPond.AddExam(randToPuddle, randExam);
 
+
                 Memory.Add(new AnnealingAction { Exam = randExam, FromPond = randFromPond, FromPuddle = randFromPuddle, ToPond = randToPond, ToPuddle = randToPuddle });
             }
         }
@@ -194,11 +198,13 @@ namespace SapLichThiITCAlgoNew
                 randToPond.AddExam(puddle2, exam1);
             }
 
+            lake.UpdateAssignmentOnly();
+
             MemoryShift.Add(new() { FromPond = randFromPond, ToPond = randToPond });
         }
 
 
-        private void RollbackMove(AnnealingAction action)
+        private void RollbackMove(Lake lake, AnnealingAction action)
         {
             var fromPond = action.FromPond;
             var toPond = action.ToPond;
@@ -207,22 +213,22 @@ namespace SapLichThiITCAlgoNew
             var exam = action.Exam;
 
 
-
             toPond.RemoveExam(toPuddle, exam);
             fromPond.AddExam(fromPuddle, exam);
 
+            lake.UpdateAssignmentOnly();
         }
 
-        private void RollbackMove(int count = 1)
+        private void RollbackMove(Lake lake, int count = 1)
         {
             for (int i = 0; i < count; i++)
             {
-                RollbackMove(Memory[Memory.Count - 1]);
+                RollbackMove(lake, Memory[Memory.Count - 1]);
                 Memory.RemoveAt(Memory.Count - 1);
             }
         }
 
-        private void RollBackMoveShift()
+        private void RollBackMoveShift(Lake lake)
         {
             var action = MemoryShift[MemoryShift.Count - 1];
             var fromPond = action.FromPond;
@@ -237,6 +243,8 @@ namespace SapLichThiITCAlgoNew
                 toPond.RemoveExam(puddle2, exam2);
                 toPond.AddExam(puddle2, exam1);
             }
+
+            lake.UpdateAssignmentOnly();
             MemoryShift.RemoveAt(MemoryShift.Count - 1);
         }
         private double ProbilityFunction(int oldPoint, int newPoint, double temperature, double volatility)

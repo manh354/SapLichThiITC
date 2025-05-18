@@ -15,6 +15,8 @@ namespace WebAppBootStrap2
             builder.Services.AddRazorComponents()
                 .AddInteractiveServerComponents();
 
+            Console.OutputEncoding = System.Text.Encoding.Unicode;
+
             Console.WriteLine("I Dont need MYSQL");
             var folder = Environment.SpecialFolder.LocalApplicationData;
             var path = Environment.GetFolderPath(folder);
@@ -23,6 +25,7 @@ namespace WebAppBootStrap2
                 options.UseSqlite($"Data Source={DbPath}", b=>b.MigrationsAssembly("WebAppBootStrap2")));
 
             builder.Services.AddSingleton<FileSaverService>();
+            builder.Services.AddScoped<FileLocationAndTypeService>();
             builder.Services.AddScoped<PurdueSchedulingService>();
 
             var app = builder.Build();

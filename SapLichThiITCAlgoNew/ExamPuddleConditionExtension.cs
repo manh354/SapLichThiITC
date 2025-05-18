@@ -86,11 +86,11 @@ namespace SapLichThiITCAlgoNew
                     return false;
                 if (exam.AltSeating)
                 {
-                    return puddle.GetRemainingCapacityAlt() > exam.Students.Count;
+                    return puddle.GetRemainingCapacityAlt() >= exam.Students.Count;
                 }
                 else
                 {
-                    return puddle.GetRemainingCapacity() > exam.Students.Count;
+                    return puddle.GetRemainingCapacity() >= exam.Students.Count;
                 }
             };
         }
@@ -154,6 +154,8 @@ namespace SapLichThiITCAlgoNew
 
         #endregion
 
+        #region Pond Conditions 
+
         public static Func<Pond, bool> GetPondHardConstraintCondition(this DatasetXml.Exam exam)
         {
             return (Pond pond) =>
@@ -171,7 +173,7 @@ namespace SapLichThiITCAlgoNew
                             break;
 
                         case DatasetXml.ConstraintType.SamePeriod:
-                            constraintSatisfied = examsInConstraint.Any(pond.Exams.Contains);
+                            constraintSatisfied = pond.Exams.Count == 0 || examsInConstraint.Any(pond.Exams.Contains);
                             break;
 
                         case DatasetXml.ConstraintType.Precedence:
@@ -216,7 +218,7 @@ namespace SapLichThiITCAlgoNew
             return (Pond pond) =>
             {
                 var links = linkages[exam];
-                return pond.Exams.Any(e =>
+                return !pond.Exams.Any(e =>
                     links.Contains(e)
                     );
             };
@@ -237,6 +239,11 @@ namespace SapLichThiITCAlgoNew
                 return exam.AvailablePeriods.FirstOrDefault(ap => ap.Period == pond.Period) != null;
             };
         }
+
+        #endregion
+
+        #region Pond Hard contraint violations count 
+        #endregion
 
         public static Comparer<Pond> GetPondSoftConstraintComparer(this DatasetXml.Exam exam, DatasetXml.ConstraintType type)
         {
@@ -287,6 +294,18 @@ namespace SapLichThiITCAlgoNew
                     return firstPond.GetRemainingCapacity().CompareTo(secondPond.GetRemainingCapacity());
                 // Reverse comparision
                 return secondPond.GetRemainingCapacity().CompareTo(firstPond.GetRemainingCapacity());
+            });
+        }
+
+        public static Comparer<Pond> GetPondLinkagesComparer(this DatasetXml.Exam exam, Dictionary<DatasetXml.Exam, HashSet<DatasetXml.Exam>> linkages)
+        {
+            return Comparer<Pond>.Create((firstPond, secondPond) =>
+            {
+                if (linkages.TryGetValue(exam, out var linkage))
+                {
+                    return firstPond.Exams.Where(linkage.Contains).Count().CompareTo(secondPond.Exams.Where(linkage.Contains).Count());
+                }
+                else return 0;
             });
         }
     }

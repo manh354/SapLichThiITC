@@ -7,6 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Remove="Components\Visualizer\VisualizerPurduePage.razor" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Blazor.Bootstrap" Version="3.3.1" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.4" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.4">
@@ -27,6 +31,18 @@
     <ProjectReference Include="..\SapLichThiITCInputHelper\SapLichThiITCInputHelper.csproj" />
     <ProjectReference Include="..\SapLichThiITC\SapLichThiITC.csproj" />
     <ProjectReference Include="..\SapLichThiKaggle\SapLichThiAlgoKaggle.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <UpToDateCheckInput Remove="Components\Visualizer\VisualizerPurduePage.razor" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <_ContentIncludedByDefault Remove="Components\Visualizer\VisualizerPurduePage.razor" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="Components\Visualizer\VisualizerPurduePage.razor" />
   </ItemGroup>
 
 </Project>

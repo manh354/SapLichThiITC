@@ -1,18 +1,58 @@
-﻿@using SapLichThiITC
+﻿@page "/schedulingPurdue"
+
+@using SapLichThiITC
+@using WebAppBootStrap2.Data
 @using WebAppBootStrap2.Services
+
+<Dropdown>
+    <DropdownToggleButton>Secondary</DropdownToggleButton>
+    <DropdownMenu>
+        @foreach(var item in fileLocationAndTypes)
+        {
+            <DropdownItem @onclick="() => HandleSelectItem(item)">
+                @(($"{item.Id} {item.FileType.ToString()}"))
+            </DropdownItem>
+        }
+    </DropdownMenu>
+</Dropdown>
 
 <Button @onclick="HandleScheduling">Xếp lịch thi</Button>
 
 @code {
     [Inject] ToastService? Toast { get; set; }
     [Inject] PurdueSchedulingService? PurdueSchedulingService { get; set; }
+    [Inject] FileLocationAndTypeService? FileLocationAndTypeService { get; set; }
 
-    private void HandleScheduling()
+    List<FileLocationAndType> fileLocationAndTypes { get; set; }
+    FileLocationAndType? SelectedFileLocationAndType { get; set; }
+
+    protected override async Task OnInitializedAsync()
     {
-        if(PurdueSchedulingService == null)
+        if (FileLocationAndTypeService == null)
+        {
+            Toast?.Notify(new(ToastType.Danger, "Thiết lập chưa đúng"));
+            return;
+        }
+        fileLocationAndTypes = await FileLocationAndTypeService.GetFileLocations();
+    }
+
+    private async Task HandleScheduling()
+    {
+        if (PurdueSchedulingService == null)
         {
             Toast?.Notify(new(ToastType.Danger, "Thiết lập không đúng"));
+            return;
         }
-        PurdueSchedulingService.RunScheduler("");
+        if(SelectedFileLocationAndType == null)
+        {
+            Toast?.Notify(new(ToastType.Danger, "Chưa chọn lịch xếp"));
+            return;
+        }
+        await PurdueSchedulingService.RunScheduler(SelectedFileLocationAndType.FileLocation);
+    }
+
+    private void HandleSelectItem(FileLocationAndType item)
+    {
+        SelectedFileLocationAndType = item;
     }
 }

@@ -99,7 +99,7 @@ namespace SapLichThiITCAlgoNew
                                 exam,
                                 out var bestPuddle,
                                 out var bestContainer,
-                                GetDefaultPuddleCondition(exam),
+                                GetDefaultPuddleCondition(exam, bestPond),
                                 GetDefaultPuddleComparer(exam)
                                 );
                             if (!puddleFound)
@@ -142,13 +142,23 @@ namespace SapLichThiITCAlgoNew
                     break;
                 }
             }
+
+            EvaluatorXml evaluatorXml = new EvaluatorXml(I_data);
+            var result = evaluatorXml.Evaluate();
+
             // If there is any residue color/ courses , break it up and fit by individual course.
             if (sortedColors.Count > 0)
             {
+                sortedColors = sortedColors
+                .OrderByDescending(item => item.Value.Max(exam => I_exam_linkages[exam].Count))
+                .ThenByDescending(item => item.Value.Max(exam => exam.Students.Count))
+                .ThenByDescending(item => item.Value.Sum(exam => exam.Students.Count))
+                .ToList();
+
                 List<KeyValuePair<int, HashSet<Exam>>> remainingColors = new();
                 foreach (var (color, examClasses) in sortedColors)
                 {
-                    Console.WriteLine($"Chương trình sẽ phân rã màu để xếp theo lớp.");
+                    Console.WriteLine($"Chương trình sẽ phân rã màu {color} để xếp theo lớp.");
                     var maxExamTime = examClasses.Max(x => x.Length);
                     FitRoomsByExam(examClasses.OrderByDescending(x => x.Students.Count).ToList(), out var residueExams
                         /*DefaultPondCondition,
@@ -162,9 +172,18 @@ namespace SapLichThiITCAlgoNew
                 sortedColors = remainingColors;
             }
 
+            result = evaluatorXml.Evaluate();
+
             if (sortedColors.Count > 0)
             {
+                sortedColors = sortedColors
+                .OrderByDescending(item => item.Value.Max(exam => I_exam_linkages[exam].Count))
+                .ThenByDescending(item => item.Value.Max(exam => exam.Students.Count))
+                .ThenByDescending(item => item.Value.Sum(exam => exam.Students.Count))
+                .ToList();
+
                 List<KeyValuePair<int, HashSet<Exam>>> remainingColors = new();
+
                 foreach (var (color, examClasses) in sortedColors)
                 {
                     FitRoomsByExamAfter(
@@ -179,9 +198,43 @@ namespace SapLichThiITCAlgoNew
                     {
                         remainingColors.Add(new(color, residueExams));
                     }
+
+                    EvaluatorXml evaluatorXml2 = new EvaluatorXml(I_data);
+                    var result2 = evaluatorXml2.Evaluate();
                 }
                 sortedColors = remainingColors;
             }
+
+            result = evaluatorXml.Evaluate();
+
+            if (sortedColors.Count > 0)
+            {
+                sortedColors = sortedColors
+                .OrderByDescending(item => item.Value.Max(exam => I_exam_linkages[exam].Count))
+                .ThenByDescending(item => item.Value.Max(exam => exam.Students.Count))
+                .ThenByDescending(item => item.Value.Sum(exam => exam.Students.Count))
+                .ToList();
+
+                List<KeyValuePair<int, HashSet<Exam>>> remainingColors = new();
+                foreach (var (color, examClasses) in sortedColors)
+                {
+                    FitRoomByExamThirdPhase(
+                        examClasses.OrderByDescending(x => x.Students.Count).ToList(),
+                        out var residueExams
+                        /*DefaultPondCondition,
+                        CreatePondComparer(false),
+                        DefaultPuddleCondition,
+                        CreatePuddleComparer(false)*/
+                        );
+                    if (residueExams.Count > 0)
+                    {
+                        remainingColors.Add(new(color, residueExams));
+                    }
+                }
+            }
+
+            this.I_lake.UpdateAssignmentOnly();
+            result = evaluatorXml.Evaluate();
             return this;
         }
 
@@ -198,15 +251,15 @@ namespace SapLichThiITCAlgoNew
             foreach (var exam in exams)
             {
                 var pondFound = I_lake.GetSuitablePondsForExam(
-                        exam,
-                        out var bestPond,
-                        out var suitablePonds,
-                        GetDefaultPondCondition(exam),
-                        GetDefaultPondComparer(exam)
-                        );
+                       exam,
+                       out var bestPond,
+                       out var suitablePonds,
+                       GetDefaultPondCondition(exam),
+                       GetDefaultPondComparer(exam)
+                       );
                 if (!pondFound)
                 {
-                    Console.WriteLine($"Không xếp được lớp thi {exam}");
+                    Console.WriteLine($"Không xếp mở rộng được lớp thi {exam}, Lí do: Không có Pond Hợp lệ");
                     residueExams.Add(exam);
                     continue;
                 }
@@ -222,27 +275,182 @@ namespace SapLichThiITCAlgoNew
                     var currentResidueExams = new HashSet<Exam>();
 
                     FitRoomsByExamByPond(
-                        clonePond, 
+                        clonePond,
                         examClassExist,
-                        out currentResidueExams, 
-                        GetDefaultPuddleCondition(exam), 
+                        out currentResidueExams,
+                        GetDefaultPuddleCondition(exam),
                         GetDefaultPuddleComparer(exam));
 
                     if (currentResidueExams.Count > 0 && pondIndex < suitablePonds.Count - 1)
                     {
+                        bestPond.UpdateAssignmentOnlyExam();
                         pondIndex += 1;
                         bestPond = suitablePonds[pondIndex];
                         continue;
                     }
                     if (currentResidueExams.Count > 0 && pondIndex == suitablePonds.Count - 1)
                     {
-                        Console.WriteLine($"Không thể xếp mở rộng cho lớp {exam}.");
+                        Console.WriteLine($"Không thể xếp mở rộng cho lớp {exam}, Lí do: Xếp thử thất bại.");
+                        residueExams.Add(exam);
+                        bestPond.UpdateAssignmentOnlyExam();
+                        break;
+                    }
+
+                    Console.WriteLine($"Xếp mở rộng thành công cho lớp {exam}: Ngày {bestPond.Period.Time}, thời gian {bestPond.Period.Time}, độ dài {bestPond.Period.Length}");
+                    bestPond.Clear();
+                    bestPond.CopyAndUpdateExamAssignmentFrom(clonePond);
+                    var count2 = bestPond.Exams.Where(e => e.Assignment.Period != null).Count();
+                    if (P_scheduledExams.Add(exam))
+                    {
+                    }
+                    break;
+                
+                }
+            }
+        }
+
+
+        private void FitRoomByExamThirdPhase(
+            List<Exam> exams,
+            out HashSet<Exam> residueExams,
+            Func<Pond, bool>? pondCondition = null,
+            Comparer<Pond>? pondComparer = null,
+            Func<Puddle, bool>? puddleCondition = null,
+            Comparer<Puddle>? puddleComparer = null
+            )
+        {
+            residueExams = new();
+            foreach (var exam in exams)
+            {
+
+                var conflictExam = I_lake.Linkages[exam];
+
+                var pondFound = I_lake.GetSuitablePondsForExam(
+                       exam,
+                       out var bestPond,
+                       out var suitablePonds,
+                       GetDefaultPondConditionWithoutPondLinkage(exam),
+                       GetDefaultPondComparerWithLinkages(exam, I_exam_linkages)
+                       );
+
+                if (!pondFound)
+                {
+                    Console.WriteLine($"Không xếp mở rộng được lớp thi {exam}, Lí do: Không có Pond Hợp lệ");
+                    residueExams.Add(exam);
+                    continue;
+                }
+
+                var pondIndex = 0;
+                while (pondIndex < suitablePonds.Count)
+                {
+
+                    var clonePond = bestPond.DeepClone();
+                    var examClassExist = clonePond.ClearAndReturn();
+                    examClassExist.Add(exam);
+
+                    var currentResidueExams = new HashSet<Exam>();
+
+                    FitRoomsByExamByPond(
+                        clonePond,
+                        examClassExist,
+                        out currentResidueExams,
+                        GetDefaultPuddleCondition(exam),
+                        GetDefaultPuddleComparer(exam));
+
+                    if (currentResidueExams.Count > 0 && pondIndex < suitablePonds.Count - 1)
+                    {
+                        bestPond.UpdateAssignmentOnlyExam();
+                        pondIndex += 1;
+                        bestPond = suitablePonds[pondIndex];
+
+                        continue;
+                    }
+                    if (currentResidueExams.Count > 0 && pondIndex == suitablePonds.Count - 1)
+                    {
+                        Console.WriteLine($"Không thể xếp mở rộng cho lớp {exam}, Lí do: Xếp thử thất bại.");
+                        exam.Assignment.Clear();
                         residueExams.Add(exam);
                         break;
                     }
 
-                    Console.WriteLine($"Pond tốt nhất tìm được cho lớp {exam}: Ngày {bestPond.Period.Time}, thời gian {bestPond.Period.Time}, độ dài {bestPond.Period.Length}");
-                    bestPond.CopyFrom(clonePond);
+                    Console.WriteLine($"Xếp mở rộng thành công cho lớp {exam}: Ngày {bestPond.Period.Time}, thời gian {bestPond.Period.Time}, độ dài {bestPond.Period.Length}");
+                    bestPond.Clear();
+                    bestPond.CopyAndUpdateExamAssignmentFrom(clonePond);
+                    if (P_scheduledExams.Add(exam))
+                    {
+                    }
+                    break;
+                }
+            }
+        }
+
+        private void FitRoomByExamFourthPhase(
+            List<Exam> exams,
+            out HashSet<Exam> residueExams,
+            Func<Pond, bool>? pondCondition = null,
+            Comparer<Pond>? pondComparer = null,
+            Func<Puddle, bool>? puddleCondition = null,
+            Comparer<Puddle>? puddleComparer = null
+            )
+        {
+            residueExams = new();
+            foreach (var exam in exams)
+            {
+
+                var conflictExam = I_lake.Linkages[exam];
+                var orderedPonds = I_lake.Ponds.Select(p => (
+                    pond: p,
+                    exams: p.Exams.Where(conflictExam.Contains).ToList()
+                )).OrderBy(pe => pe.exams.Count).ToList();
+
+                var pondFound = I_lake.GetSuitablePondsForExam(
+                       exam,
+                       out var bestPond,
+                       out var suitablePonds,
+                       GetDefaultPondConditionWithoutPondLinkage(exam),
+                       GetDefaultPondComparerWithLinkages(exam, I_exam_linkages)
+                       );
+                if (!pondFound)
+                {
+                    Console.WriteLine($"Không xếp mở rộng được lớp thi {exam}, Lí do: Không có Pond Hợp lệ");
+                    residueExams.Add(exam);
+                    continue;
+                }
+
+                var pondIndex = 0;
+                while (pondIndex < suitablePonds.Count)
+                {
+
+                    var clonePond = bestPond.DeepClone();
+                    var examClassExist = clonePond.ClearAndReturn();
+                    examClassExist.Add(exam);
+
+                    var currentResidueExams = new HashSet<Exam>();
+
+                    FitRoomsByExamByPond(
+                        clonePond,
+                        examClassExist,
+                        out currentResidueExams,
+                        GetDefaultPuddleCondition(exam),
+                        GetDefaultPuddleComparer(exam));
+
+                    if (currentResidueExams.Count > 0 && pondIndex < suitablePonds.Count - 1)
+                    {
+                        pondIndex += 1;
+                        bestPond = suitablePonds[pondIndex];
+
+                        continue;
+                    }
+                    if (currentResidueExams.Count > 0 && pondIndex == suitablePonds.Count - 1)
+                    {
+                        Console.WriteLine($"Không thể xếp mở rộng cho lớp {exam}, Lí do: Xếp thử thất bại.");
+                        residueExams.Add(exam);
+                        break;
+                    }
+
+                    Console.WriteLine($"Xếp mở rộng thành công cho lớp {exam}: Ngày {bestPond.Period.Time}, thời gian {bestPond.Period.Time}, độ dài {bestPond.Period.Length}");
+                    bestPond.Clear();
+                    bestPond.CopyAndUpdateExamAssignmentFrom(clonePond);
                     if (P_scheduledExams.Add(exam))
                     {
                     }
@@ -394,8 +602,9 @@ namespace SapLichThiITCAlgoNew
                     specificPond, exam,
                     out var bestPuddle,
                     out var suitablePuddles,
-                    puddleCondition,
-                    puddleComparer);
+                    GetDefaultPuddleCondition(exam),
+                    GetDefaultPuddleComparer(exam));
+
                 if (!puddleFound)
                 {
                     Console.WriteLine($"Pond_specific: Không tìm thấy Puddle cho lớp {exam}.");
@@ -408,7 +617,14 @@ namespace SapLichThiITCAlgoNew
                 {
                 }
             }
-            exams = residueExams.ToList();
+        }
+
+        private void RemoveAssignmentOfExams(List<Exam> exams)
+        {
+            foreach (var exam in exams)
+            {
+                exam.Assignment = new();
+            }
         }
 
         private void FitRoomsHardConstraintExams()
@@ -576,7 +792,7 @@ namespace SapLichThiITCAlgoNew
             return lake.GetSuitablePondsForExams(exams, out chosenPond, out suitablePonds, condition, comparer);
         }
 
-        public Func<Puddle, bool> GetDefaultPuddleConditionForExams(List<Exam> exams )
+        public Func<Puddle, bool> GetDefaultPuddleConditionForExams(List<Exam> exams)
         {
             throw new Exception();
             //return exams.Select(e=> e.GetPondDurationComparer())
@@ -590,6 +806,21 @@ namespace SapLichThiITCAlgoNew
                 .WrapOverChild(exam.GetPuddleRoomAvailableCondition())
                 .WrapOverChild(exam.GetPuddleHardConstraintCondition())
                 ;
+        }
+
+        public Func<Puddle, bool> GetDefaultPuddleCondition(Exam exam, Pond pond)
+        {
+            var condition = exam.GetPondAvailableCondition().And(exam.GetPondDurationCondition())(pond);
+            return p =>
+            {
+                if (!condition) return false;
+                else return exam
+                .GetPuddleSizeCondition()
+                .And(condition)
+                .WrapOverChild(exam.GetPuddleRoomAvailableCondition())
+                .WrapOverChild(exam.GetPuddleHardConstraintCondition())
+                (p);
+            };
         }
 
         public Comparer<Puddle> GetDefaultPuddleComparer(Exam exam)
@@ -614,10 +845,32 @@ namespace SapLichThiITCAlgoNew
                 ;
         }
 
+        public Func<Pond, bool> GetDefaultPondConditionWithoutPondLinkage(Exam exam)
+        {
+            return exam
+                .GetPondDurationCondition()
+                .WrapOverChild(exam.GetPondAvailableCondition())
+                .WrapOverChild(exam.GetPondInstructorAvailabilityCondition())
+                .WrapOverChild(exam.GetPondStudentAvailabilityCondition())
+                .WrapOverChild(exam.GetPondHardConstraintCondition());
+
+        }
+
         public Comparer<Pond> GetDefaultPondComparer(Exam exam)
         {
             return exam
                 .GetPondSoftConstraintComparer(ConstraintType.DifferentPeriod)
+                .WrapOverChild(exam.GetPondSoftConstraintComparer(ConstraintType.SamePeriod))
+                .WrapOverChild(exam.GetPondDurationComparer(longerContainerFirst: false))
+                .WrapOverChild(exam.GetPondCapacityComparer(largerContainerFirst: false))
+                ;
+        }
+
+        public Comparer<Pond> GetDefaultPondComparerWithLinkages(Exam exam, Dictionary<Exam, HashSet<Exam>> linkages)
+        {
+            return exam
+                .GetPondLinkagesComparer(linkages)
+                .WrapOverChild(exam.GetPondSoftConstraintComparer(ConstraintType.DifferentPeriod))
                 .WrapOverChild(exam.GetPondSoftConstraintComparer(ConstraintType.SamePeriod))
                 .WrapOverChild(exam.GetPondDurationComparer(longerContainerFirst: false))
                 .WrapOverChild(exam.GetPondCapacityComparer(largerContainerFirst: false))

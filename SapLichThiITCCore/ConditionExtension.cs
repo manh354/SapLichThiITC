@@ -20,8 +20,27 @@
         {
             return (t) =>
             {
-                if (parent(t)) return child(t);
+                if (parent(t))
+                {
+                    return child(t);
+                }
                 else return false;
+            };
+        }
+
+        public static Func<T, bool> And<T>(this Func<T, bool> func, bool condition)
+        {
+            return (t) =>
+            {
+                return condition && func(t);
+            };
+        }
+
+        public static Func<T, bool> And<T>(this Func<T, bool> func1, Func<T, bool> func2)
+        {
+            return (t) =>
+            {
+                return func1(t) && func2(t);
             };
         }
     }

@@ -1,21 +1,37 @@
 ﻿@page "/fileUploadPurdue"
+@using WebAppBootStrap2.Data
 @using WebAppBootStrap2.Services
 
 <label for="fileInput"></label>
-<InputFile class="form-control" id="fileInput" OnChange="HandleUploadFile">
-
+<Dropdown Color="DropdownColor.Primary">
+    <DropdownToggleButton>
+        Chọn phân loại file
+    </DropdownToggleButton>
+    <DropdownMenu>
+        @foreach (var item in Enum.GetValues(typeof(FileType)))
+        {
+            <DropdownItem @onclick="() => SelectedFileType = (FileType) item">
+                @(((FileType?)item).GetFileTypeName())
+            </DropdownItem>
+        }
+    </DropdownMenu>
+    <p>Đang chọn @(((FileType?)SelectedFileType).GetFileTypeName())</p>
+</Dropdown>
+<InputFile required class="form-control" id="fileInput" OnChange="HandleUploadFile">
 </InputFile>
 
-<Button @onclick="ProcessUploadedFile">Xử lý file</Button>
+<Button Color="ButtonColor.Primary" @onclick="ProcessUploadedFile">Xử lý file</Button>
 
-@code{
+@code {
     [Inject] ToastService? Toast { get; set; }
     [Inject] FileSaverService? FileSaverService { get; set; }
+    [Inject] FileLocationAndTypeService? FileLocationAndTypeService { get; set; }
     [Inject] IConfiguration? Configuration { get; set; }
 
     const int MAX_FILE_SIZE = 1024 * 1024 * 512;
 
     private IBrowserFile? DatasetFile { get; set; }
+    private FileType? SelectedFileType { get; set; }
 
     public async Task HandleUploadFile(InputFileChangeEventArgs e)
     {
@@ -28,18 +44,29 @@
             Toast?.Notify(new ToastMessage(ToastType.Danger, "Chưa có file nào được tải lên"));
             return;
         }
-        if(FileSaverService == null || Configuration == null)
+        if (SelectedFileType is null)
         {
-            Toast?.Notify(new ToastMessage(ToastType.Danger, "Thiết lập chưa đúng"));
+            Toast?.Notify(new ToastMessage(ToastType.Danger, "Chưa chọn phân loại file"));
             return;
         }
-        string? storagePath = Configuration.GetValue<string>("storage");
+        if (FileSaverService == null || Configuration == null || FileLocationAndTypeService == null)
+        {
+            Toast?.Notify(new ToastMessage(ToastType.Danger, $"Thiết lập chưa đúng FileSaverService = {FileSaverService == null} Configuration = {Configuration == null} FileLocationAndTypeService = {FileLocationAndTypeService == null}"));
+            return;
+        }
+        string? storagePath = Configuration.GetValue<string>("FileStorage");
         if (storagePath == null)
         {
             Toast?.Notify(new ToastMessage(ToastType.Danger, "Thiết lập chưa đúng"));
             return;
         }
         string filePath = await FileSaverService.SaveAsync(DatasetFile, storagePath, MAX_FILE_SIZE, DatasetFile.Name);
+        int id = await FileLocationAndTypeService.AddFileLocation(new FileLocationAndType()
+            {
+                Name = DatasetFile.Name,
+                FileLocation = filePath,
 
+            });
+        Toast?.Notify(new ToastMessage(ToastType.Success, $"Gửi file thành công, id = {id}, filePath = {filePath}"));
     }
 }

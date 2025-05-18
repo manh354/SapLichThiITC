@@ -1,0 +1,124 @@
+﻿@page "/visualizer"
+
+@using SapLichThiITC
+@using WebAppBootStrap2.Data
+@using WebAppBootStrap2.Services
+@using Services
+@using SapLichThiITCAlgoNew
+@using SapLichThiITC
+
+
+<div class="container-fluid">
+    <h3 class="my-4">Lake Schedule View</h3>
+
+
+    <div class="lake-container">
+        @foreach (var pond in Lake.Ponds)
+        {
+            <div class="pond-row mb-4">
+                <div class="pond-header d-flex justify-content-between align-items-center bg-primary text-white p-3 rounded-top">
+                    <h5 class="mb-0">@pond.Period.ToDisplayText()</h5>
+                    <div class="pond-time">@pond.Period.Time</div>
+                </div>
+
+                <div class="pond-content p-3 border border-primary border-top-0 rounded-bottom">
+                    <div class="row">
+                        @if (pond.Puddles.Any())
+                        {
+                            @foreach (var puddle in pond.Puddles)
+                            {
+                                <div class="col-md-4 col-sm-6 mb-3">
+                                    <div class="puddle-card card h-100 @(true ? "border-success" : "border-danger")">
+                                        <div class="card-header @(true ? "bg-success" : "bg-danger") text-white">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <strong>@puddle.Room.ToDisplayText()</strong>
+                                                <span class="badge bg-light text-dark">Size:  @puddle.Room.Size</span>
+                                                <span class="badge bg-light text-dark">AltSize:  @puddle.Room.AltSize</span>
+                                            </div>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="status-indicator mb-2">
+                                                @if (puddle.Exam == null)
+                                                {
+                                                    <span class="badge bg-success">Available</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-danger">Booked</span>
+                                                }
+                                            </div>
+@* 
+                                            @if (!string.IsNullOrEmpty(puddle.Notes))
+                                            {
+                                                <div class="notes mt-2">
+                                                    <small class="text-muted">Notes:</small>
+                                                    <p class="mb-0">@puddle.Notes</p>
+                                                </div>
+                                            } *@
+                                        </div>
+                                        <div class="card-footer bg-light">
+                                            <button class="btn btn-sm btn-outline-primary" @onclick="() => {}">
+                                                Manage Room
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <div class="col-12">
+                                <div class="alert alert-info">
+                                    No rooms assigned to this shift.
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+
+        @if (Lake== null || !Lake.Ponds.Any())
+        {
+            <div class="alert alert-warning">
+                Error
+            </div>
+        }
+    </div>
+</div>
+
+<style>
+    .lake-container {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .pond-row {
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .pond-time {
+        font-size: 0.9rem;
+        background-color: rgba(255,255,255,0.2);
+        padding: 3px 10px;
+        border-radius: 4px;
+    }
+
+    .puddle-card {
+        transition: transform 0.2s ease;
+    }
+
+        .puddle-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+</style>
+
+
+@code {
+    [Inject] PurdueSchedulingService? purdueSchedulingService { get;set; }
+    Lake? Lake { get; set; }
+    protected override async Task OnInitializedAsync()
+    {
+        Lake = purdueSchedulingService?.GetLake();
+    }
+}

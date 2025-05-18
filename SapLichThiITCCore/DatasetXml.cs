@@ -31,6 +31,10 @@ namespace SapLichThiITCCore
             public int AltSize { get; set; }
             public string Coordinates { get; set; }
             public List<RoomPeriodPreference> PeriodPreferences { get; set; } = new List<RoomPeriodPreference>();
+            public override string ToString()
+            {
+                return $"Id: {Id}, Size: {Size}";
+            }
         }
 
         public class ExamPeriod
@@ -345,6 +349,11 @@ namespace SapLichThiITCCore
                     Penalty = period.Penalty,
                 };
             }
+
+            public string ToDisplayText()
+            {
+                return $"Id:{Id}, Date:{Day}, Time:{Time}";
+            }
         }
 
         public class RoomPeriodPreference
@@ -383,6 +392,15 @@ namespace SapLichThiITCCore
                         return RoomPeriodPreference.FromRawPeriodPreference(pr, periods);
                     }).ToList(),
                 };
+            }
+            public override string ToString()
+            {
+                return $"Size: {Size}, Id: {Id},  AltSize: {AltSize}";
+            }
+
+            public string ToDisplayText()
+            {
+                return $"Id:{Id}, Size:{Size}, AltSize:{AltSize}";
             }
         }
         public class ExamPeriod
@@ -462,7 +480,7 @@ namespace SapLichThiITCCore
             public HashSet<DistributionConstraint> Constraints { get; set; } = new();
             public override string ToString()
             {
-                return $"id: {Id}, size: {Students.Count}, length: {Length}";
+                return $"Size: {Students.Count}, length: {Length}, id: {Id}";
 
             }
 

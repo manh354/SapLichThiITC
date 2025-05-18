@@ -1,7 +1,110 @@
 ﻿using static SapLichThiITCCore.DatasetXml;
 
+using System;
+using System.Collections.Generic;
+using System.Runtime.CompilerServices;
+
+
 namespace SapLichThiITCAlgoNew
 {
+
+    public class ExamColoring
+    {
+        private Dictionary<Exam, HashSet<Exam>> adjacencyList;
+        private Dictionary<Exam, int> colorAssignment;
+        private Dictionary<Exam, HashSet<int>> adjacentColors;
+        private Dictionary<Exam, int> degree;
+        private SortedSet<Exam> priorityQueue;
+
+        public ExamColoring(Dictionary<Exam, HashSet<Exam>> adjacencyList)
+        {
+            this.adjacencyList = adjacencyList;
+        }
+
+        public void ColorExams()
+        {
+            // Reset color assignments
+            colorAssignment = new Dictionary<Exam, int>();
+
+            // If there are no exams, return empty color assignment
+            if (adjacencyList.Count == 0)
+            {
+                return;
+            }
+
+            // Track saturation degree (number of different colors in adjacent vertices)
+            Dictionary<Exam, HashSet<int>> adjacentColors = new Dictionary<Exam, HashSet<int>>();
+            foreach (var exam in adjacencyList.Keys)
+            {
+                adjacentColors[exam] = new HashSet<int>();
+            }
+
+            // Track uncolored exams
+            HashSet<Exam> uncoloredExams = new HashSet<Exam>(adjacencyList.Keys);
+
+            while (uncoloredExams.Count > 0)
+            {
+                // Select the vertex with the highest saturation degree
+                // In case of a tie, select the one with highest degree (most conflicts)
+                Exam examToColor = null;
+                int maxSaturation = -1;
+                int maxDegree = -1;
+
+                foreach (var exam in uncoloredExams)
+                {
+                    int saturation = adjacentColors[exam].Count;
+                    int degree = adjacencyList[exam].Count;
+
+                    if (saturation > maxSaturation ||
+                        (saturation == maxSaturation && degree > maxDegree))
+                    {
+                        maxSaturation = saturation;
+                        maxDegree = degree;
+                        examToColor = exam;
+                    }
+                }
+
+                // Find the smallest available color for the selected exam
+                HashSet<int> usedColors = new HashSet<int>();
+                foreach (var adjacentExam in adjacencyList[examToColor])
+                {
+                    if (colorAssignment.TryGetValue(adjacentExam, out int color))
+                    {
+                        usedColors.Add(color);
+                    }
+                }
+
+                // Assign the smallest available color
+                int smallestAvailableColor = 0;
+                while (usedColors.Contains(smallestAvailableColor))
+                {
+                    smallestAvailableColor++;
+                }
+
+                colorAssignment[examToColor] = smallestAvailableColor;
+                uncoloredExams.Remove(examToColor);
+
+                // Update adjacent colors for neighbors
+                foreach (var adjacentExam in adjacencyList[examToColor])
+                {
+                    if (uncoloredExams.Contains(adjacentExam))
+                    {
+                        adjacentColors[adjacentExam].Add(smallestAvailableColor);
+                    }
+                }
+            }
+
+        }
+
+       
+        public Dictionary<Exam, int> GetColors()
+        {
+            return colorAssignment;
+        }
+    }
+
+
+
     public class ColorerXml
     {
         public required List<Exam> I_exams { get; set; }
@@ -88,7 +191,9 @@ namespace SapLichThiITCAlgoNew
                 }
             }
 
+
             return colors;
+
         }
 
         public ColorerXml Run()
@@ -130,6 +235,12 @@ namespace SapLichThiITCAlgoNew
                 O_color_exams.Add(colorIndex, thisColoredExams);
                 colorIndex++;
             }
+
+            // 
+            var newColorer = new ExamColoring(I_exam_linkages);
+            newColorer.ColorExams();
+            var newColor = newColorer.GetColors();
+            int maxColorCount2 = newColor.Select(c =>c.Value).Distinct().Count();
             /*var resultRaw = ColorExams();
             O_color_exams = resultRaw.Select(x => x.Key).GroupBy(x => resultRaw[x]).ToDictionary(x => x.Key, x => x.ToHashSet());*/
             // Return
